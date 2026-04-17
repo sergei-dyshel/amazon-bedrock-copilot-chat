@@ -15,6 +15,9 @@ export interface BedrockSettings {
   context1M: {
     enabled: boolean;
   };
+  debug: {
+    forceEstimateTokens: boolean;
+  };
   inferenceProfiles: {
     preferRegional: boolean;
   };
@@ -136,9 +139,14 @@ export async function getBedrockSettings(globalState: vscode.Memento): Promise<B
       ? (rawReasoningEffort as ReasoningEffort)
       : undefined;
 
+  const forceEstimateTokens = config.get<boolean>("debug.forceEstimateTokens", false);
+
   return {
     context1M: {
       enabled: context1MEnabled,
+    },
+    debug: {
+      forceEstimateTokens,
     },
     inferenceProfiles: {
       preferRegional: preferRegionalInferenceProfiles,

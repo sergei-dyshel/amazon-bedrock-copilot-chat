@@ -32,7 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
       e.affectsConfiguration("bedrock.thinking.enabled") ||
       e.affectsConfiguration("bedrock.thinking.budgetTokens") ||
       e.affectsConfiguration("github.copilot.chat.anthropic.thinking.enabled") ||
-      e.affectsConfiguration("github.copilot.chat.anthropic.thinking.maxTokens")
+      e.affectsConfiguration("github.copilot.chat.anthropic.thinking.maxTokens") ||
+      e.affectsConfiguration("bedrock.debug.forceEstimateTokens")
     ) {
       provider.notifyModelInformationChanged("configuration changed");
     }

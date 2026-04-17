@@ -714,6 +714,11 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
       return totalTokens;
     };
 
+    const settings = await getBedrockSettings(this.globalState);
+    if (settings.debug.forceEstimateTokens) {
+      return estimateTokens(text);
+    }
+
     try {
       // Create AbortController for cancellation support
       const abortController = new AbortController();
@@ -747,7 +752,6 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
         }
 
         // Convert the message to Bedrock format
-        const settings = await getBedrockSettings(this.globalState);
         const converted = convertMessages([text], baseModelId, {
           extendedThinkingEnabled: false,
           lastThinkingBlock: undefined,
