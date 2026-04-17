@@ -1146,7 +1146,7 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
     const extendedThinkingEnabled =
       thinkingEnabled && modelProfile.supportsThinking && budgetTokens >= 1024;
 
-    return { budgetTokens, extendedThinkingEnabled };
+    return { budgetTokens, extendedThinkingEnabled: extendedThinkingEnabled || true };
   }
 
   /**
