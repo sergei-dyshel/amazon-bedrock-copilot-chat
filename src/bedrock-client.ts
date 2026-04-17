@@ -433,7 +433,7 @@ export class BedrockAPIClient {
       // Cache the result
       this.inferenceProfileCache.set(modelId, baseModelId);
 
-      logger.trace(
+      logger.debug(
         `[Bedrock API Client] Resolved inference profile ${modelId} to model ID: ${baseModelId}`,
       );
 
@@ -452,7 +452,7 @@ export class BedrockAPIClient {
       if (isPermanent) {
         this.inferenceProfileCache.set(modelId, modelId);
       }
-      logger.trace(
+      logger.debug(
         `[Bedrock API Client] GetInferenceProfile failed for ${modelId}, treating as regular model ID`,
         error,
       );

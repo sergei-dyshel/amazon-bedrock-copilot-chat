@@ -503,7 +503,7 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
       let baseModelId: string;
       try {
         baseModelId = await this.client.resolveModelId(model.id, abortController.signal);
-        logger.info("[Bedrock Model Provider] Resolved model ID", {
+        logger.trace("[Bedrock Model Provider] Resolved model ID", {
           originalModelId: model.id,
           resolvedBaseModelId: baseModelId,
         });
