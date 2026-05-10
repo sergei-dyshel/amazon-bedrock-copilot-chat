@@ -703,12 +703,12 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
     // Fallback estimation function
     const estimateTokens = (input: LanguageModelChatMessage | string): number => {
       if (typeof input === "string") {
-        return Math.ceil(input.length / 4);
+        return Math.ceil(input.length / 6);
       }
       let totalTokens = 0;
       for (const part of input.content) {
         if (part instanceof vscode.LanguageModelTextPart) {
-          totalTokens += Math.ceil(part.value.length / 4);
+          totalTokens += Math.ceil(part.value.length / 6);
         }
       }
       return totalTokens;
