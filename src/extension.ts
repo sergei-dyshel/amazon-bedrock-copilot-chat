@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { manageSettings } from "./commands/manage-settings";
 import { logger } from "./logger";
 import { BedrockChatModelProvider } from "./provider";
+import { registerTokenUsageStatusBar } from "./status-bar";
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel("Amazon Bedrock Models", { log: true });
@@ -106,6 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
     secretsDebounceDisposable,
     lmDisposable,
     lmDebounceDisposable,
+    registerTokenUsageStatusBar(provider),
   );
 }
 

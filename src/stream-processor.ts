@@ -3,6 +3,7 @@ import type {
   GuardrailAssessment,
   GuardrailTraceAssessment,
   ReasoningContentBlockDelta,
+  TokenUsage,
 } from "@aws-sdk/client-bedrock-runtime";
 import { GuardrailContentPolicyAction, StopReason } from "@aws-sdk/client-bedrock-runtime";
 import * as vscode from "vscode";
@@ -13,6 +14,7 @@ import { ToolBuffer } from "./tool-buffer";
 
 export interface StreamProcessingResult {
   thinkingBlock?: ThinkingBlock;
+  usage?: TokenUsage;
 }
 
 export interface ThinkingBlock {
@@ -29,6 +31,7 @@ interface ProcessingState {
   textChunkCount: number;
   toolBuffer: ToolBuffer;
   toolCallCount: number;
+  usage: TokenUsage | undefined;
 }
 
 export class StreamProcessor {
@@ -46,6 +49,7 @@ export class StreamProcessor {
       textChunkCount: 0,
       toolBuffer: new ToolBuffer(),
       toolCallCount: 0,
+      usage: undefined,
     };
 
     state.toolBuffer.clear();
@@ -128,7 +132,7 @@ export class StreamProcessor {
       this.logCompletion(state);
       this.validateStreamResult(state, token);
 
-      return { thinkingBlock: state.capturedThinkingBlock };
+      return { thinkingBlock: state.capturedThinkingBlock, usage: state.usage };
     } catch (error) {
       logger.error("[Stream Processor] Error during stream processing:", error);
       throw error;
@@ -214,7 +218,7 @@ export class StreamProcessor {
     } else if (event.messageStop) {
       this.handleMessageStop(event.messageStop, state);
     } else if (event.metadata) {
-      this.handleMetadata(event.metadata);
+      this.handleMetadata(event.metadata, state);
     } else {
       logger.info("[Stream Processor] Unknown event type:", Object.keys(event));
     }
@@ -246,8 +250,16 @@ export class StreamProcessor {
     });
   }
 
-  private handleMetadata(metadata: NonNullable<ConverseStreamOutput["metadata"]>): void {
+  private handleMetadata(
+    metadata: NonNullable<ConverseStreamOutput["metadata"]>,
+    state: ProcessingState,
+  ): void {
     logger.info("[Stream Processor] Metadata received:", metadata);
+
+    if (metadata.usage) {
+      state.usage = metadata.usage;
+      logger.debug("[Stream Processor] Token usage captured", metadata.usage);
+    }
 
     const guardrailData = metadata?.trace?.guardrail;
     if (!guardrailData) {

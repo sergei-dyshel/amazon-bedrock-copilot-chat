@@ -4,6 +4,7 @@ import type {
   CountTokensCommandInput,
   Message,
   SystemContentBlock,
+  TokenUsage,
   ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
 import { inspect, MIMEType } from "node:util";
@@ -48,6 +49,10 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
   private readonly _onDidChangeLanguageModelInformation = new vscode.EventEmitter<void>();
   readonly onDidChangeLanguageModelInformation = this._onDidChangeLanguageModelInformation.event;
 
+  // Event to notify subscribers of token usage after each response
+  private readonly _onDidUpdateTokenUsage = new vscode.EventEmitter<TokenUsage>();
+  readonly onDidUpdateTokenUsage = this._onDidUpdateTokenUsage.event;
+
   private chatEndpoints: { model: string; modelMaxPromptTokens: number }[] = [];
   private readonly client: BedrockAPIClient;
   /** Tracks whether the initial model fetch has completed (for avoiding startup feedback loops) */
@@ -70,6 +75,7 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
   public dispose(): void {
     try {
       this._onDidChangeLanguageModelInformation.dispose();
+      this._onDidUpdateTokenUsage.dispose();
     } catch {
       // ignore
     }
@@ -1873,6 +1879,11 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
       }
 
       logger.info("[Bedrock Model Provider] Finished processing stream");
+
+      // Emit token usage for status bar display
+      if (result.usage) {
+        this._onDidUpdateTokenUsage.fire(result.usage);
+      }
     } finally {
       cancellationListener.dispose();
     }
