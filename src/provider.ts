@@ -13,7 +13,6 @@ import type {
   LanguageModelChatInformation,
   LanguageModelChatMessage,
   LanguageModelChatProvider,
-  LanguageModelResponsePart,
   LanguageModelResponsePart2,
   Progress,
 } from "vscode";
@@ -47,11 +46,14 @@ class NoAccessibleModelsError extends Error {
 export class BedrockChatModelProvider implements vscode.Disposable, LanguageModelChatProvider {
   // Event to notify VS Code that model information has changed
   private readonly _onDidChangeLanguageModelInformation = new vscode.EventEmitter<void>();
-  readonly onDidChangeLanguageModelInformation = this._onDidChangeLanguageModelInformation.event;
+  readonly onDidChangeLanguageModelChatInformation =
+    this._onDidChangeLanguageModelInformation.event;
 
   // Event to notify subscribers of token usage after each response
   private readonly _onDidUpdateTokenUsage = new vscode.EventEmitter<TokenUsage>();
   readonly onDidUpdateTokenUsage = this._onDidUpdateTokenUsage.event;
+
+  private cachedModels: LanguageModelChatInformation[] = [];
 
   private chatEndpoints: { model: string; modelMaxPromptTokens: number }[] = [];
   private readonly client: BedrockAPIClient;
@@ -104,6 +106,8 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
     options: { silent: boolean },
     token: CancellationToken,
   ): Promise<LanguageModelChatInformation[]> {
+    if (this.cachedModels.length > 0) return this.cachedModels;
+    logger.debug(`[Bedrock Model Provider] prepareLanguageModelChatInformation called`);
     const settings = await getBedrockSettings(this.globalState);
 
     // Check if this is the first run by checking if we've shown the welcome prompt before
@@ -362,6 +366,10 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
           // Mark initial fetch as complete to allow onDidChangeChatModels handling
           this.initialFetchComplete = true;
 
+          if (infos.length > 0) {
+            this.cachedModels = infos;
+            logger.info(`[Bedrock Model Provider] Fetched ${infos.length} models`);
+          }
           return infos;
         };
 
@@ -468,7 +476,7 @@ export class BedrockChatModelProvider implements vscode.Disposable, LanguageMode
     model: LanguageModelChatInformation,
     messages: readonly LanguageModelChatMessage[],
     options: Parameters<LanguageModelChatProvider["provideLanguageModelChatResponse"]>[2],
-    progress: Progress<LanguageModelResponsePart>,
+    progress: Progress<LanguageModelResponsePart2>,
     token: CancellationToken,
   ): Promise<void> {
     const trackingProgress: Progress<LanguageModelResponsePart2> = {
