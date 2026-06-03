@@ -73,6 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
   let lmRefreshHandle: ReturnType<typeof setTimeout> | undefined;
 
   const lmDisposable = vscode.lm.onDidChangeChatModels(() => {
+    return;
     // Skip events until the initial model fetch is complete to avoid feedback loops
     if (!provider.isInitialFetchComplete()) {
       logger.debug("[Extension] Ignoring onDidChangeChatModels before initial fetch complete");
