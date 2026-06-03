@@ -7,22 +7,11 @@
 			"group": "build",
 			"problemMatcher": [
 				"$tsc-watch",
-				{
-					"owner": "esbuild",
-					"source": "esbuild",
-					"fileLocation": "relative",
-					"pattern": {
-						"regexp": "^✘ \\[ERROR\\] (.*)$",
-						"message": 1
-					},
-					"background": {
-						"activeOnStart": true,
-						"beginsPattern": "^\\[watch\\] build started",
-						"endsPattern": "^\\[watch\\] build (finished|failed)"
-					}
-				}
 			],
 			"isBackground": true,
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
 			"presentation": {
 				"reveal": "never",
 				"group": "watchers"

@@ -27,6 +27,10 @@
     "url": "https://github.com/tinovyatkin/amazon-bedrock-copilot-chat/issues"
   },
   "license": "MIT",
+  "enabledApiProposals": [
+    "chatProvider",
+    "languageModelThinkingPart"
+  ],
   "contributes": {
     "languageModelChatProviders": [
       {
@@ -161,10 +165,10 @@
   "scripts": {
     "vscode:prepublish": "bun run package",
     "download-api": "dts dev",
-    "postdownload-api": "dts main",
     "postinstall": "bun run download-api",
     "compile": "bun build --outdir ./dist --target=node --external=vscode --sourcemap=linked --format=cjs ./src/extension.ts",
     "check-types": "tsgo --noEmit",
+    "watch": "tsgo --watch",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -1,7 +1,7 @@
 import type * as bedrockRuntime from "@aws-sdk/client-bedrock-runtime";
 import { CachePointType } from "@aws-sdk/client-bedrock-runtime";
-import type { LanguageModelChatTool } from "vscode";
-import { type LanguageModelChatProvider, LanguageModelChatToolMode } from "vscode";
+import type { LanguageModelChatTool, ProvideLanguageModelChatResponseOptions } from "vscode";
+import { LanguageModelChatToolMode } from "vscode";
 
 import { logger } from "../logger";
 import { getModelProfile } from "../profiles";
@@ -11,7 +11,7 @@ import { convertSchema } from "./schema";
  * Convert VSCode tools to Bedrock tool configuration
  */
 export function convertTools(
-  options: Parameters<LanguageModelChatProvider["provideLanguageModelChatResponse"]>[2],
+  options: ProvideLanguageModelChatResponseOptions,
   modelId: string,
   extendedThinkingEnabled?: boolean,
   promptCachingEnabled?: boolean,
@@ -52,17 +52,13 @@ export function convertTools(
   // Add tool choice if supported by the model
   // CRITICAL: Cannot set tool_choice when extended thinking enabled
   // API error: "Thinking may not be enabled when tool_choice forces tool use"
-  if (profile.supportsToolChoice && options.toolMode !== undefined && !extendedThinkingEnabled) {
+  if (profile.supportsToolChoice && !extendedThinkingEnabled) {
     if (options.toolMode === LanguageModelChatToolMode.Required) {
       config.toolChoice = { any: {} } satisfies bedrockRuntime.AnyToolChoice;
     } else if (options.toolMode === LanguageModelChatToolMode.Auto) {
       config.toolChoice = { auto: {} } satisfies bedrockRuntime.AutoToolChoice;
     }
-  } else if (
-    profile.supportsToolChoice &&
-    options.toolMode !== undefined &&
-    extendedThinkingEnabled
-  ) {
+  } else if (profile.supportsToolChoice && extendedThinkingEnabled) {
     logger.debug("[Tool Converter] Skipping tool_choice (incompatible with extended thinking)", {
       requestedMode: options.toolMode,
     });

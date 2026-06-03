@@ -153,6 +153,13 @@ export default defineConfig([
     },
   },
   {
-    ignores: ["out", "dist", "node_modules", ".vscode-test", "**/vscode.d.ts"],
+    ignores: [
+      "out",
+      "dist",
+      "node_modules",
+      ".vscode-test",
+      "**/vscode.d.ts",
+      "vscode.proposed.*.d.ts",
+    ],
   },
 ]);
